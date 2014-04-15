@@ -1,20 +1,17 @@
 #pragma once
-#include "DirectXWindow.h"
+#include "DXUtil.h"
 
-class Game : DirectXWindow
+using namespace Time;
+using namespace FrameworkObjects;
+
+class Game
 {
 public:
 	//Ctor & Dtor
-	Game(HINSTANCE instanceHandle);
+	Game();
 	~Game(void);
 
-	// initializer
-	bool Initialize() override;
-	// main loop method
-	MSG Run() override;
-	// update method, called from Run()
-	void Update(double deltaTime) override;
-	// draw method, called from Run()
-	void Draw(double deltaTime) override;
+	void Update(GameTime gameTime);
+	void Draw(GameTime gameTime);
 };
 

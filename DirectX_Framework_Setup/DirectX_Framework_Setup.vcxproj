@@ -64,6 +64,7 @@
   <ItemGroup>
     <ClCompile Include="DirectXWindow.cpp" />
     <ClCompile Include="dxerr.cpp" />
+    <ClCompile Include="Framework.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Win32Window.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="DirectXWindow.h" />
     <ClInclude Include="dxerr.h" />
     <ClInclude Include="DXUtil.h" />
+    <ClInclude Include="Framework.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Win32Window.h" />
   </ItemGroup>

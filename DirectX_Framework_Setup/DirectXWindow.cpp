@@ -82,7 +82,7 @@ bool DirectXWindow::InitializeSwapChainAndDevice(bool isFullScreen)
 	swapDesc.BufferDesc.Width = m_ClientWidth;
 	swapDesc.BufferDesc.Height = m_ClientHeight;
 	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapDesc.BufferDesc.RefreshRate.Numerator = 60;	// 60 frames
+	swapDesc.BufferDesc.RefreshRate.Numerator = 60;		// 60 frames
 	swapDesc.BufferDesc.RefreshRate.Denominator = 1;	// per second
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapDesc.OutputWindow = m_WindowHandle;

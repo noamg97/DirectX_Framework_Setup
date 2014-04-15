@@ -47,3 +47,37 @@ namespace Memory
 		}
 	}
 }
+
+namespace FrameworkObjects
+{
+	ID3D11Device*			Device;
+	ID3D11DeviceContext*	ImmediateContext;
+	IDXGISwapChain*			SwapChain;
+	ID3D11RenderTargetView*	RenderTargetView;
+	D3D_DRIVER_TYPE			GpuDriverType;
+	D3D_FEATURE_LEVEL		FeatureLevel;
+	D3D11_VIEWPORT			ViewPort;
+}
+
+namespace Time
+{
+	struct GameTime
+	{
+	public: 
+		// all milliseconds
+		double TotalGameTime;
+		double ElapsedTime;
+
+		GameTime()
+		{
+			this->TotalGameTime = 0;
+			this->ElapsedTime = 0;
+		}
+
+		GameTime(double TotalGameTime, double ElapsedTime)
+		{
+			this->TotalGameTime = TotalGameTime;
+			this->ElapsedTime = ElapsedTime;
+		}
+	};
+}
