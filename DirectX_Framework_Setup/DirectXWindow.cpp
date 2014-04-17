@@ -1,7 +1,11 @@
 #include "DirectXWindow.h"
 
-DirectXWindow::DirectXWindow(HINSTANCE instanceHandle) : Win32Window(instanceHandle, "DirectX TryOut", "DirectX TryOut")
+// Ctor & Dtor
+DirectXWindow::DirectXWindow(HINSTANCE instanceHandle, GameInfo* gameInfo) 
+	: Win32Window(instanceHandle, gameInfo->Name, gameInfo->Name, gameInfo->ResolutionWidth, gameInfo->ResolutionHeight)
 {
+	this->m_pGameInfo = gameInfo;
+
 	// null out all the pointers. see that on the previous line we initialized the base class.
 	m_pDevice = nullptr;
 	m_pImmediateContext= nullptr;
@@ -9,7 +13,20 @@ DirectXWindow::DirectXWindow(HINSTANCE instanceHandle) : Win32Window(instanceHan
 	m_pRenderTargetView= nullptr;
 }
 
+DirectXWindow::~DirectXWindow(void)
+{
+	// cleanup
+	if(m_pImmediateContext) m_pImmediateContext->ClearState();
 
+	Memory::SafeRelease(m_pRenderTargetView);
+	Memory::SafeRelease(m_pSwapChain);
+	Memory::SafeRelease(m_pImmediateContext);
+	Memory::SafeRelease(m_pDevice);
+}
+
+
+
+// Initializers:
 bool DirectXWindow::Initialize()
 {
 	// initialize the window (base class) and the direct3d stuff, and return false if something fails
@@ -82,7 +99,7 @@ bool DirectXWindow::InitializeSwapChainAndDevice(bool isFullScreen)
 	swapDesc.BufferDesc.Width = m_ClientWidth;
 	swapDesc.BufferDesc.Height = m_ClientHeight;
 	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapDesc.BufferDesc.RefreshRate.Numerator = 60;		// 60 frames
+	swapDesc.BufferDesc.RefreshRate.Numerator = 60;	// 60 frames
 	swapDesc.BufferDesc.RefreshRate.Denominator = 1;	// per second
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapDesc.OutputWindow = m_WindowHandle;
@@ -118,12 +135,83 @@ bool DirectXWindow::InitializeSwapChainAndDevice(bool isFullScreen)
 
 
 
-DirectXWindow::~DirectXWindow(void)
+// Main Loop:
+MSG DirectXWindow::Run()
 {
-	// cleanup
-	if(m_pImmediateContext) m_pImmediateContext->ClearState();
-	Memory::SafeRelease(m_pRenderTargetView);
-	Memory::SafeRelease(m_pSwapChain);
-	Memory::SafeRelease(m_pImmediateContext);
-	Memory::SafeRelease(m_pDevice);
+	// get the current time (start time) and set the TicksToMilliseconds ratio
+	StartTimeCounter();
+	// initialize the message variable
+	MSG msg = Win32Window::Run();
+
+
+
+	// main framework loop. Run the application as long as there isn't a Quit message	
+	while(msg.message != WM_QUIT)
+	{
+		// get the time elapsed from the last loop run
+		double elapsed = GetElapsedTime();
+
+
+		// lock fps: check if the elapsed time from the last frame is greater the defined FPS (if GameInfo::FramesPerSecond is greater than 0)
+		if(m_pGameInfo->FramesPerSecond <= 0 || elapsed > 1000.0 / m_pGameInfo->FramesPerSecond)
+		{
+			// create a GameTime object to pass to the Update and Draw functions
+			GameTime gameTime(m_TimeUntilLastFrame + elapsed, elapsed);
+
+
+			// call our game's realtime update and draw methods (similar to XNA)
+			Update(gameTime);
+			Draw(gameTime);
+			
+
+			// set TimeUntilLastFrame to the current time. (The time this current frame has just ended at)
+			m_TimeUntilLastFrame += GetElapsedTime();
+		}
+
+		// get the current message and process it. Null for no message
+		msg = Win32Window::Run();
+	}
+
+	// return the quit message
+	return msg;
+}
+
+void DirectXWindow::StartTimeCounter()
+{
+	// declare a variable just to send to the QueryPerformance functions
+	LARGE_INTEGER li;
+
+	// get the frequency (ticks per second) and convert it to ticks per millisecond
+	QueryPerformanceFrequency(&li);
+	m_TicksToMilliseconds = double(li.QuadPart) / 1000.0;
+
+
+	// get the current ticks count and set the m_TimeUntilLastFrame accordingly
+	QueryPerformanceCounter(&li);
+	m_TimeUntilLastFrame = (double)li.QuadPart / m_TicksToMilliseconds;
+}
+
+double DirectXWindow::GetElapsedTime()
+{
+	// declare a variable just to send to the QueryPerformance functions
+	LARGE_INTEGER li;
+
+	// get the current ticks count
+	QueryPerformanceCounter(&li);
+
+	// retrun the differance between the current ticks count (in milliseconds) and the last frame's milliseconds count
+	return (double(li.QuadPart) / m_TicksToMilliseconds) - m_TimeUntilLastFrame;
+}
+
+
+
+
+// Utility Methods:
+void DirectXWindow::Present()
+{
+	HR(m_pSwapChain->Present(0,0));
+}
+void DirectXWindow::Clear(const FLOAT color[4])
+{
+	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, color);
 }

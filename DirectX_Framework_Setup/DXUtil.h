@@ -5,7 +5,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 
-// macro wrapper for the dxerr.h functions that shows a messagebox when an error has occured in a function that returns HRESULT and is wrapped by "HR(...)"
+// macro wrapper for the dxerr.h functions that shows a messagebox when an error occurs in a function that returns an HRESULT, and is wrapped by "HR(...)"
 #ifdef _DEBUG
 #ifndef HR
 #define HR(x) { HRESULT hr = x; if(FAILED(hr)) DXTraceW(__FILEW__, __LINE__, hr, L#x, true); }
@@ -48,19 +48,9 @@ namespace Memory
 	}
 }
 
-namespace FrameworkObjects
-{
-	ID3D11Device*			Device;
-	ID3D11DeviceContext*	ImmediateContext;
-	IDXGISwapChain*			SwapChain;
-	ID3D11RenderTargetView*	RenderTargetView;
-	D3D_DRIVER_TYPE			GpuDriverType;
-	D3D_FEATURE_LEVEL		FeatureLevel;
-	D3D11_VIEWPORT			ViewPort;
-}
-
 namespace Time
 {
+	// a GameTime object that contains all the time related data that should be passed to the Update & Draw methods
 	struct GameTime
 	{
 	public: 
@@ -81,3 +71,24 @@ namespace Time
 		}
 	};
 }
+
+struct GameInfo
+{
+	int FramesPerSecond;
+	bool StartAtFullScreen;
+	int ResolutionWidth, ResolutionHeight;
+	string Name;
+
+	GameInfo(
+		int FramesPerSecond,
+		bool StartAtFullScreen,
+		int ResolutionWidth, int ResolutionHeight,
+		string Name)
+	{
+		this->FramesPerSecond = FramesPerSecond;
+		this->StartAtFullScreen = StartAtFullScreen;
+		this->ResolutionWidth = ResolutionWidth;
+		this->ResolutionHeight = ResolutionHeight;
+		this->Name = Name;
+	}
+};

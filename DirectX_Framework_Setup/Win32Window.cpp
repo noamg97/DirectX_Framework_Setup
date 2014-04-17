@@ -2,11 +2,11 @@
 
 LRESULT CALLBACK MsgProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	// a function that is being called by the OS everytime a message is sent. Must exist.
+	// a function that is being called by the OS everytime a windows message is sent. Must exist in order to create a window.
 	switch (msg)
 	{
 	case WM_DESTROY: 
-		// if the window is destroyed post a quit message that Run() will catch.
+		// if the window is destroyed post a quit message that Run() method will later catch.
 		PostQuitMessage(0); 
 		return 0;
 	default: 
@@ -16,35 +16,19 @@ LRESULT CALLBACK MsgProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lPar
 
 
 
+
 //Ctor
-Win32Window::Win32Window(HINSTANCE instanceHandle, string ApplicationTitle, string WindowClassName)
+Win32Window::Win32Window(HINSTANCE instanceHandle, string ApplicationTitle, string WindowClassName, int Width, int Height)
 {
 	m_InstanceHandle = instanceHandle;
 	m_WindowHandle = NULL;				// since we didn't create a window yet
-	m_ClientWidth = 800;
-	m_ClientHeight = 600;
+	m_ClientWidth = Width;
+	m_ClientHeight = Height;
 	m_ApplicationTitle = ApplicationTitle;
 	m_WindowClassName = WindowClassName;
 	m_WindowStyle = WS_OVERLAPPEDWINDOW;
 }
 
-
-//Run
-MSG Win32Window::Run()
-{
-	MSG msg = {0}; // set all to zero
-
-	// PeekMessage() puts the current message in msg, and returns true if it's not null
-	if(PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))
-	{
-		// if there is a message we have to call these two functions.
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-
-	// return the current message, so we'd know when we should stop the app
-	return msg;
-}
 
 
 //Initializers
@@ -53,9 +37,10 @@ bool Win32Window::Initialize()
 	// create and register a window class, then continue if registered successfully
 	if(InitWindowClass())
 	{
-		// create and register a window class, then continue if registered successfully
+		// create the window, then continue if created successfully
 		if(InitWindow())
 		{
+			// show the window and return true for successful initialization
 			ShowWindow(m_WindowHandle, SW_SHOW);
 			return true;
 		}
@@ -75,9 +60,9 @@ bool Win32Window::InitWindowClass()
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.cbSize = sizeof(WNDCLASSEX);
-	windowClass.style = CS_HREDRAW | CS_VREDRAW; // doesn't matter since we're using directx to draw
+	windowClass.style = CS_HREDRAW | CS_VREDRAW; // doesn't matter since we're using directX to draw
 
-	// things that somewhat matter:
+	// things that do somewhat matter:
 	windowClass.hInstance = m_InstanceHandle;
 	windowClass.lpfnWndProc = MsgProc;
 	windowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
@@ -98,7 +83,7 @@ bool Win32Window::InitWindowClass()
 
 bool Win32Window::InitWindow()
 {
-	// get actual window size from the defined size + titlebar and borders
+	// get actual window sizes from the defined size + titlebar and borders
 	RECT windowRect = {0, 0, m_ClientWidth, m_ClientHeight}; // {x0, y0, x1, y1}
 	AdjustWindowRect(&windowRect, m_WindowStyle, false);
 
@@ -106,11 +91,12 @@ bool Win32Window::InitWindow()
 	UINT width = windowRect.right - windowRect.left;
 	UINT height = windowRect.bottom - windowRect.top;
 
-	// get the location of the window, in which it will be in the center of the screen
+	// get the location in which the window will be positioned at the center of the screen
 	UINT x = GetSystemMetrics(SM_CXSCREEN) / 2 - width / 2;
 	UINT y = GetSystemMetrics(SM_CYSCREEN) / 2 - height / 2;
 
-	// create the window and set our window handle code.
+
+	// create the window and set our window's handle code.
 	m_WindowHandle = CreateWindow(m_WindowClassName.c_str(), m_ApplicationTitle.c_str(), m_WindowStyle, 
 		x, y, width, height, NULL, NULL, m_InstanceHandle, NULL);
 
@@ -123,4 +109,23 @@ bool Win32Window::InitWindow()
 	}
 
 	return true;
+}
+
+
+
+//Run
+MSG Win32Window::Run()
+{
+	MSG msg = {0}; // set all to zero
+
+	// PeekMessage() puts the current windows message in msg, and returns true if it's not null
+	if(PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))
+	{
+		// if there is a message we have to call these two functions.
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	// return the current message, so we'd know when we should stop the app
+	return msg;
 }
