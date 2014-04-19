@@ -12,4 +12,3 @@ public:
 	void Update(GameTime gameTime) override;
 	void Draw(GameTime gameTime) override;
 };
-

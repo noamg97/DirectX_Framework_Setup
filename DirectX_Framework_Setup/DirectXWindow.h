@@ -30,8 +30,8 @@ private:
 	void StartTimeCounter();
 	double GetElapsedTime();
 	double m_TicksToMilliseconds; // (ticks / milliseconds) ratio
-	double m_TimeUntilLastFrame;
-
+	double m_TimeUntilCurrentFrameStarted; // counts the total time since StartTimeCounter() was called. Is set to the current time at the end of each frame.
+	double m_TotalGameTime; // milliseconds
 	// Game Info:
 	GameInfo*				m_pGameInfo;
 

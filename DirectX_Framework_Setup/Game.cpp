@@ -1,13 +1,14 @@
 #include "Game.h"
 
 // create a static variable containing the programmer's pre-defined game info, used to initialize the DirectX and the Win32Window
-static GameInfo* gameInfo = new GameInfo(60, false, 800, 600, "DirectX Tryout");
+static GameInfo* gameInfo = 
+	new GameInfo("DirectX Tryout", 2, 800, 600, false);
 
 
 
 Game::Game(HINSTANCE instanceHandle) : DirectXWindow(instanceHandle, gameInfo)
 {
-	// Load game content and initialize
+	// Initialize load game content
 }
 
 Game::~Game(void)
@@ -20,7 +21,6 @@ Game::~Game(void)
 
 void Game::Update(GameTime gameTime)
 {
-	// Update game
 }
 
 void Game::Draw(GameTime gameTime)

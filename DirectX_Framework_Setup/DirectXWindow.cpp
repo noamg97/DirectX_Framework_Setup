@@ -1,6 +1,6 @@
 #include "DirectXWindow.h"
 
-// Ctor & Dtor
+// Ctor & Dtor:
 DirectXWindow::DirectXWindow(HINSTANCE instanceHandle, GameInfo* gameInfo) 
 	: Win32Window(instanceHandle, gameInfo->Name, gameInfo->Name, gameInfo->ResolutionWidth, gameInfo->ResolutionHeight)
 {
@@ -138,38 +138,36 @@ bool DirectXWindow::InitializeSwapChainAndDevice(bool isFullScreen)
 // Main Loop:
 MSG DirectXWindow::Run()
 {
-	// get the current time (start time) and set the TicksToMilliseconds ratio
-	StartTimeCounter();
 	// initialize the message variable
 	MSG msg = Win32Window::Run();
-
+	// init the elapsed variable
+	double elapsed = 0;
+	// get the current time (start time) and set the TicksToMilliseconds ratio
+	StartTimeCounter();
 
 
 	// main framework loop. Run the application as long as there isn't a Quit message	
 	while(msg.message != WM_QUIT)
 	{
-		// get the time elapsed from the last loop run
-		double elapsed = GetElapsedTime();
+		// create a GameTime object to pass to the Update and Draw functions
+		GameTime gameTime(m_TotalGameTime, elapsed);
+
+		// call our game's realtime update and draw methods
+		Update(gameTime);
+		Draw(gameTime);
 
 
-		// lock fps: check if the elapsed time from the last frame is greater the defined FPS (if GameInfo::FramesPerSecond is greater than 0)
-		if(m_pGameInfo->FramesPerSecond <= 0 || elapsed > 1000.0 / m_pGameInfo->FramesPerSecond)
-		{
-			// create a GameTime object to pass to the Update and Draw functions
-			GameTime gameTime(m_TimeUntilLastFrame + elapsed, elapsed);
-
-
-			// call our game's realtime update and draw methods (similar to XNA)
-			Update(gameTime);
-			Draw(gameTime);
-			
-
-			// set TimeUntilLastFrame to the current time. (The time this current frame has just ended at)
-			m_TimeUntilLastFrame += GetElapsedTime();
-		}
 
 		// get the current message and process it. Null for no message
 		msg = Win32Window::Run();
+
+		// wait until the current frame is finished, or continue if we don't want to lock the frame rate (m_pGameInfo->FramesPerSecond is <= 0)
+		do { elapsed = GetElapsedTime(); }
+		while (m_pGameInfo->FramesPerSecond > 0 && elapsed < 1000.0 / (m_pGameInfo->FramesPerSecond));
+
+		// set TimeUntilCurrentFrameStarted to the time the current frame had ended at
+		m_TimeUntilCurrentFrameStarted += elapsed;
+		m_TotalGameTime += elapsed;
 	}
 
 	// return the quit message
@@ -178,6 +176,10 @@ MSG DirectXWindow::Run()
 
 void DirectXWindow::StartTimeCounter()
 {
+	// init the total game time variable
+	m_TotalGameTime = 0;
+
+
 	// declare a variable just to send to the QueryPerformance functions
 	LARGE_INTEGER li;
 
@@ -186,9 +188,9 @@ void DirectXWindow::StartTimeCounter()
 	m_TicksToMilliseconds = double(li.QuadPart) / 1000.0;
 
 
-	// get the current ticks count and set the m_TimeUntilLastFrame accordingly
+	// get the current ticks count and set the m_TimeUntilCurrentFrameStarted accordingly
 	QueryPerformanceCounter(&li);
-	m_TimeUntilLastFrame = (double)li.QuadPart / m_TicksToMilliseconds;
+	m_TimeUntilCurrentFrameStarted = (double)li.QuadPart / m_TicksToMilliseconds;
 }
 
 double DirectXWindow::GetElapsedTime()
@@ -200,7 +202,7 @@ double DirectXWindow::GetElapsedTime()
 	QueryPerformanceCounter(&li);
 
 	// retrun the differance between the current ticks count (in milliseconds) and the last frame's milliseconds count
-	return (double(li.QuadPart) / m_TicksToMilliseconds) - m_TimeUntilLastFrame;
+	return (double(li.QuadPart) / m_TicksToMilliseconds) - m_TimeUntilCurrentFrameStarted;
 }
 
 

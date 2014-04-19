@@ -80,10 +80,11 @@ struct GameInfo
 	string Name;
 
 	GameInfo(
-		int FramesPerSecond,
-		bool StartAtFullScreen,
-		int ResolutionWidth, int ResolutionHeight,
-		string Name)
+		string Name,
+		int FramesPerSecond = 60,
+		int ResolutionWidth = 800,
+		int ResolutionHeight = 600,
+		bool StartAtFullScreen = false)
 	{
 		this->FramesPerSecond = FramesPerSecond;
 		this->StartAtFullScreen = StartAtFullScreen;
